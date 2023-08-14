@@ -30,7 +30,7 @@ Define package manager to test (PyPI, npm, and Gem)
 
 Example:
 ```bash
-$ python3 main.php --packages npm,pypi
+$ python3 main.py --packages npm,pypi
 ```
 
 ## To-Do List
