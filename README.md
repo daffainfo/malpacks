@@ -1,6 +1,8 @@
 # Malpacks
 Tools to find malicious packages inside package manager (PyPI, npm, and Gem)
 
+![image](https://github.com/daffainfo/malpacks/assets/36522826/d2983fa6-32f3-454f-92bd-f50b15faca82)
+
 ## Total malicious packages
 * npm: 1823
 * PyPI: 5985
