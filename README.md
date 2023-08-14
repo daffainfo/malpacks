@@ -1,10 +1,10 @@
 # Malpacks
 Tools to find malicious packages inside package manager (PyPI, npm, and Gem)
 
-## Total data
+## Total malicious packages
 * npm: 1823
-* pypi: 5985
-* gem: 725
+* PyPI: 5985
+* Gem: 725
 
 ## Installation
 Simply clone the repository, install requirements and run the script
