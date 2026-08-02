@@ -204,26 +204,3 @@ python3 .github/scripts/build_database.py                 # both sources
 python3 .github/scripts/build_database.py --source ossf   # just OpenSSF
 python3 .github/scripts/build_database.py --output /tmp/db.json --no-readme
 ```
-
-## To-Do List
-- [x] Scan a file that contains a list of packages
-  - [x] Scan requirements.txt (Python)
-  - [x] Scan package.json (npm)
-- [x] More output options
-  - [x] JSON
-  - [x] CSV
-  - [x] SARIF
-- [x] Add more package managers
-  - [x] PyPI
-  - [x] npm
-  - [x] Gem
-  - [x] Go
-  - [x] Composer
-  - [x] Cargo, Maven, NuGet, VS Code extensions
-- [x] Add more malicious packages
-  - [x] https://blog.phylum.io/phylum-discovers-another-attack-on-pypi/
-  - [x] https://www.reversinglabs.com/blog/mining-for-malicious-ruby-gems
-  - [x] https://github.com/DataDog/malicious-software-packages-dataset
-  - [x] https://github.com/ossf/malicious-packages
-- [ ] YAML output
-- [ ] Shard `database.json` per ecosystem if it outgrows ~45 MB
