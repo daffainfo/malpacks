@@ -1,55 +1,50 @@
-import json
-from colorama import Fore, Style
-from packages import npm, pypi, gem
+"""Turning collected dependencies into findings."""
 
-npm_packages = []
-pypi_packages = []
-gem_packages = []
+from core.report import Finding
+from packages import gem, manifests, npm, pypi
 
-def scan(args):
+COLLECTORS = {
+    "npm": npm.installed,
+    "pypi": pypi.installed,
+    "gem": gem.installed,
+}
 
-    if args.all:
-        npm_packages = npm.list_all_npm_packages()
-        pypi_packages = pypi.list_all_pypi_packages()
-        gem_packages = gem.list_all_gem_packages()
-        check('npm', npm_packages)
-        check('pypi', pypi_packages)
-        check('gem', gem_packages)
 
-    if args.packages:
-        packages_type = args.packages.split(',')
-        for package_type in packages_type:
-            if package_type == 'npm':
-                npm_packages = npm.list_all_npm_packages()
-                check('npm', npm_packages)
-            elif package_type == 'pypi':
-                pypi_packages = pypi.list_all_pypi_packages()
-                check('pypi', pypi_packages)
-            elif package_type == 'gem':
-                gem_packages = gem.list_all_gem_packages()
-                check('gem', gem_packages)
-            else:
-                print(Fore.RED + f"[!] Unknown package type: {package_type}")
-                print(Style.RESET_ALL)
+def evaluate(dependencies, db, include_unaffected=False):
+    """Match every dependency against the database."""
+    findings, seen = [], set()
+    for dependency in dependencies:
+        for match in db.match(
+            dependency.ecosystem, dependency.name, dependency.version,
+            include_unaffected=include_unaffected,
+        ):
+            key = (
+                dependency.ecosystem, dependency.name, dependency.version,
+                match.advisory or match.url, dependency.location,
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            findings.append(Finding(dependency, match))
+    return findings
 
-def check(package_type, package_names):
-    with open('database.json') as json_file:
-        database = json.load(json_file)
 
-    print(Fore.YELLOW + f"[!] Checking {package_type} packages...")
+def scan_installed(ecosystems, db, include_unaffected=False):
+    """Check installed packages. Returns (findings, dependencies, checked),
+    where checked lists the managers that actually answered."""
+    dependencies, checked = [], []
+    for ecosystem in ecosystems:
+        collector = COLLECTORS.get(ecosystem)
+        if collector is None:
+            continue
+        collected = collector()
+        if collected:
+            checked.append(ecosystem)
+        dependencies.extend(collected)
+    return evaluate(dependencies, db, include_unaffected), dependencies, checked
 
-    found_count = 0
-    for package in database:
-        package_type_in_db = package.get('type', '')
-        package_name = package.get('name', '')
-        package_url = package.get('url', '')
 
-        if package_type == package_type_in_db and package_name in package_names:
-            print(Fore.RED + f"[+] Package found: {package_name}")
-            print(Fore.RED + f"[+] Advisory: {package_url}")
-            print(Style.RESET_ALL)
-            found_count = found_count + 1
-
-    if found_count == 0:
-        print(Fore.GREEN + f"[+] No malicious {package_type} packages found.")
-        print(Style.RESET_ALL)
+def scan_paths(paths, db, max_depth=12, include_unaffected=False):
+    """Check projects under paths. Returns (findings, dependencies, files)."""
+    dependencies, files = manifests.collect(paths, max_depth=max_depth)
+    return evaluate(dependencies, db, include_unaffected), dependencies, files

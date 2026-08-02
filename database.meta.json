@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-08-02T05:44:07Z",
+  "total": 237604,
+  "size_mb": 27.03,
+  "ecosystems": {
+    "npm": 221076,
+    "pypi": 12188,
+    "gem": 3513,
+    "nuget": 777,
+    "vscode": 19,
+    "go": 18,
+    "cargo": 10,
+    "maven": 2,
+    "composer": 1
+  },
+  "sources": {
+    "ossf": 232693,
+    "datadog": 4116,
+    "curated": 795
+  },
+  "upstream": [
+    {
+      "name": "ossf",
+      "url": "https://github.com/ossf/malicious-packages"
+    },
+    {
+      "name": "datadog",
+      "url": "https://github.com/DataDog/malicious-software-packages-dataset"
+    }
+  ]
+}

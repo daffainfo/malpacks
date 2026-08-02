@@ -1,32 +1,57 @@
+"""Globally installed npm packages."""
+
+import json
 import subprocess
 
-def list_all_npm_packages():
+from packages import Dependency
+
+LOCATION = "npm (installed)"
+
+
+def installed():
+    """Return the globally installed npm packages as Dependency records."""
+    result = _run(["npm", "ls", "-g", "--depth=0", "--json"])
+    if result is None:
+        return []
+
     try:
-        result = subprocess.run(['npm', 'ls', '-g'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        payload = json.loads(result)
+    except ValueError:
+        return _parse_tree(_run(["npm", "ls", "-g", "--depth=0"]) or "")
 
-        if result.returncode == 0:
-            # Split the captured output into lines to get package lines
-            package_lines = result.stdout.split('\n')
+    dependencies = []
+    for name, meta in (payload.get("dependencies") or {}).items():
+        version = meta.get("version") if isinstance(meta, dict) else None
+        dependencies.append(Dependency("npm", name, version, LOCATION))
+    return dependencies
 
-            # Initialize an empty list to store package names
-            package_names = []
 
-            # Print only the package names without directory structure
-            for package_line in package_lines:
-                package_name = package_line.strip()
-                if package_name and package_name != '/usr/local/lib':
-                    package_name = package_line.split('@')[0].strip()
-                    package_name = package_name.replace('├──', '').replace('└──', '').strip()
-                    if package_name:
-                        package_names.append(package_name)
-            
-            return package_names  # Return the list of package names
+def _parse_tree(output):
+    """Fallback for npm versions that do not support --json."""
+    dependencies = []
+    for line in output.splitlines():
+        line = line.strip().replace("├──", "").replace("└──", "").replace("+--", "").replace("`--", "").strip()
+        if not line or line.startswith("/") or " " in line:
+            continue
+        # Scoped packages keep their leading @: @scope/name@1.2.3
+        prefix, separator, version = line.rpartition("@")
+        if not separator or not prefix:
+            prefix, version = line, None
+        dependencies.append(Dependency("npm", prefix, version, LOCATION))
+    return dependencies
 
-        else:
-            print("Error:", result.stderr)
 
-    except Exception as e:
-        print("An error occurred:", e)
+def _run(command):
+    try:
+        # npm exits non-zero on unmet peer deps but still prints a usable tree.
+        result = subprocess.run(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=120
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return result.stdout if result.stdout.strip() else None
 
-#packages_array = list_all_npm_packages()
-#print(packages_array)
+
+def list_all_npm_packages():
+    """Backwards compatible helper: names only."""
+    return [dependency.name for dependency in installed()]

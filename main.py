@@ -1,20 +1,9 @@
-import argparse
-from colorama import Fore, Style
-from core import scanner, cli
+#!/usr/bin/env python3
+"""malpacks - find malicious packages in your projects and on your machine."""
 
-def main():
-    cli.banner()
-    parser = argparse.ArgumentParser(description='Specify scan parameters.')
+import sys
 
-    parser.add_argument('--all', action='store_true', help='Scanning all package managers')
-    parser.add_argument('--packages', type=str, help='Define package manager to test', default="")
+from core.cli import main
 
-    args = parser.parse_args()
-
-    if not args.all and not args.packages:
-        parser.error('Please specify either --all or --packages')
-
-    scanner.scan(args)
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    sys.exit(main())

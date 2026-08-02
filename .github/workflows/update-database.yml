@@ -1,0 +1,73 @@
+name: Update database
+
+on:
+  schedule:
+    # Every day at 03:30 UTC. Upstream feeds publish continuously, so a daily
+    # sync keeps database.json within a day of the OpenSSF corpus.
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build the database but do not commit"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-database
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rebuild database.json
+        id: build
+        run: python3 .github/scripts/build_database.py
+
+      - name: Self check
+        run: |
+          pip install -r requirements.txt
+          python3 main.py --silent stats
+          python3 - <<'PY'
+          import json, subprocess, sys
+
+          # Take a record straight out of the freshly built database and make
+          # sure a lookup for it still reports a finding.
+          entry = json.load(open("database.json"))[0]
+          reference = "%s:%s" % (entry["type"], entry["name"])
+          if entry.get("versions"):
+              reference += "@" + entry["versions"][0]
+          code = subprocess.call([sys.executable, "main.py", "--silent", "check",
+                                  reference, "--fail-on-found"])
+          print("check %s -> exit %d" % (reference, code))
+          sys.exit(0 if code == 1 else 1)
+          PY
+
+      - name: Commit and push
+        if: ${{ github.event_name == 'schedule' || !inputs.dry_run }}
+        env:
+          SUMMARY: ${{ steps.build.outputs.summary }}
+        run: |
+          if [ -z "$(git status --porcelain database.json database.meta.json README.md)" ]; then
+            echo "database is already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add database.json database.meta.json README.md
+          git commit -m "chore(db): sync malicious packages" -m "$SUMMARY"
+          git push
+
+      - name: Job summary
+        if: always()
+        run: echo "${{ steps.build.outputs.summary }}" >> "$GITHUB_STEP_SUMMARY"
