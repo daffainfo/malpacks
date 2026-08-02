@@ -2,7 +2,7 @@
 
 Find malicious packages in your projects, on your machine and in your GitHub repositories.
 
-![image](https://github.com/daffainfo/malpacks/assets/36522826/d2983fa6-32f3-454f-92bd-f50b15faca82)
+<img src="https://github.com/user-attachments/assets/2d3ed0c6-2a52-473c-8672-a6c1570fbd74" />
 
 ## Total malicious packages
 <!-- malpacks:counts:start -->
