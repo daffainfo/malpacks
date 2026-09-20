@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-19T03:37:17Z",
-  "total": 242516,
+  "generated_at": "2026-09-20T03:38:10Z",
+  "total": 242517,
   "size_mb": 27.71,
   "ecosystems": {
     "npm": 225705,
-    "pypi": 12345,
+    "pypi": 12346,
     "gem": 3628,
     "nuget": 777,
     "cargo": 20,
@@ -14,7 +14,7 @@
     "composer": 1
   },
   "sources": {
-    "ossf": 237553,
+    "ossf": 237554,
     "datadog": 4168,
     "curated": 795
   },
