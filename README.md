@@ -8,8 +8,8 @@ Find malicious packages in your projects, on your machine and in your GitHub rep
 <!-- malpacks:counts:start -->
 | Ecosystem | Malicious packages |
 | --- | ---: |
-| npm | 226,868 |
-| PyPI | 12,554 |
+| npm | 226,870 |
+| PyPI | 12,560 |
 | RubyGems | 4,306 |
 | NuGet | 782 |
 | crates.io | 21 |
@@ -17,9 +17,9 @@ Find malicious packages in your projects, on your machine and in your GitHub rep
 | VS Code | 20 |
 | Maven | 2 |
 | Packagist | 1 |
-| **Total** | **244,574** |
+| **Total** | **244,582** |
 
-_Last synced: 2026-10-31T03:32:28Z_
+_Last synced: 2026-11-01T03:32:33Z_
 <!-- malpacks:counts:end -->
 
 ## Installation
